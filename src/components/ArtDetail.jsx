@@ -70,9 +70,9 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
         detail?.aggregations?.[0]?.edmInstitutionName?.[0] ||
         getLangValue(detail?.aggregations?.[0]?.edmDataProvider);
 
-    const sourceUrl = detail?.aggregations?.[0]?.edmIsShownAt?.[0] ||
-        detail?.aggregations?.[0]?.['edm:isShownAt']?.[0] ||
-        (detail?.aggregations?.[0]?.edmIsShownAt && detail.aggregations[0].edmIsShownAt[0]);
+    const sourceUrl = getLangValue(detail?.aggregations?.[0]?.edmIsShownAt) ||
+        getLangValue(detail?.aggregations?.[0]?.['edm:isShownAt']) ||
+        detail?.aggregations?.[0]?.edmIsShownAt?.[0];
 
     return (
         <AnimatePresence>

@@ -10,56 +10,66 @@ function App() {
   const [featured, setFeatured] = useState([]);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('*');
   const [selectedItem, setSelectedItem] = useState(null);
+  const [startIndex, setStartIndex] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const featuredData = await getFeaturedArtworks();
-        setFeatured(featuredData.items);
-        setResults(featuredData.items);
-      } catch (error) {
-        console.error('Failed to fetch initial data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async (query, start = 1, append = false) => {
+    if (start === 1) setLoading(true);
+    else setLoadingMore(true);
 
-    fetchInitialData();
-  }, []);
-
-  const handleSearch = async (query) => {
-    setLoading(true);
-    setSearchQuery(query);
-    setActiveCategory('*');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
-      const data = await searchArtworks({ query: query || '*' });
-      setResults(data.items);
+      const data = await searchArtworks({
+        query: query || '*',
+        start: start,
+        rows: 24
+      });
+
+      if (append) {
+        setResults(prev => [...prev, ...data.items]);
+      } else {
+        setResults(data.items);
+      }
+      setTotalResults(data.totalResults);
+      if (start === 1 && !append && data.items.length > 0) {
+        setFeatured(data.items.slice(0, 1));
+      }
     } catch (error) {
-      console.error('Search failed:', error);
+      console.error('Fetch failed:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
+  useEffect(() => {
+    fetchData('*', 1);
+  }, []);
+
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+    setActiveCategory('*');
+    setStartIndex(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetchData(query, 1);
+  };
+
   const handleCategoryChange = async (category) => {
-    setLoading(true);
     setActiveCategory(category);
     setSearchQuery('');
+    setStartIndex(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    try {
-      const data = await searchArtworks({
-        query: category === '*' ? '*' : category
-      });
-      setResults(data.items);
-    } catch (error) {
-      console.error('Category change failed:', error);
-    } finally {
-      setLoading(false);
-    }
+    fetchData(category === '*' ? '*' : category, 1);
+  };
+
+  const handleLoadMore = () => {
+    if (loadingMore || results.length >= totalResults) return;
+    const nextStart = startIndex + 24;
+    setStartIndex(nextStart);
+    fetchData(searchQuery || activeCategory, nextStart, true);
   };
 
   return (
@@ -76,8 +86,11 @@ function App() {
         <ArtGrid
           items={results}
           loading={loading}
+          loadingMore={loadingMore}
+          hasMore={results.length < totalResults}
           title={searchQuery ? `Search results for "${searchQuery}"` : "Eternal Collections"}
           onSelectItem={(id) => setSelectedItem(id)}
+          onLoadMore={handleLoadMore}
         />
       </main>
 

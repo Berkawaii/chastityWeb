@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import ArtCard from './ArtCard';
 import LoadingIndicator from './LoadingIndicator';
 import { motion } from 'framer-motion';
 
-const ArtGrid = ({ items, loading, title, onSelectItem }) => {
-    if (loading) return <LoadingIndicator />;
+const ArtGrid = ({ items, loading, loadingMore, hasMore, title, onSelectItem, onLoadMore }) => {
+    const observerTarget = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+                    onLoadMore();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
+        }
+
+        return () => {
+            if (observerTarget.current) {
+                observer.unobserve(observerTarget.current);
+            }
+        };
+    }, [hasMore, loadingMore, loading, onLoadMore]);
+
+    if (loading && items.length === 0) return <LoadingIndicator />;
 
     return (
         <section style={{ padding: '4rem 2rem', maxWidth: '1400px', margin: '0 auto' }}>
@@ -31,9 +54,29 @@ const ArtGrid = ({ items, loading, title, onSelectItem }) => {
                 }}
             >
                 {items.map((item, index) => (
-                    <ArtCard key={item.id} item={item} index={index} onClick={() => onSelectItem(item.id)} />
+                    <ArtCard key={`${item.id}-${index}`} item={item} index={index} onClick={() => onSelectItem(item.id)} />
                 ))}
             </motion.div>
+
+            {/* Infinite Scroll Sentinel */}
+            <div ref={observerTarget} style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {loadingMore && <div className="mini-spinner" style={{
+                    width: '30px',
+                    height: '30px',
+                    border: '3px solid var(--color-border)',
+                    borderTopColor: 'var(--color-accent)',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                }}></div>}
+            </div>
+
+            <style>
+                {`
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                `}
+            </style>
 
             {items.length === 0 && !loading && (
                 <div style={{ textAlign: 'center', padding: '8rem 0' }}>
