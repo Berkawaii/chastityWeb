@@ -14,6 +14,7 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
                 setLoading(true);
                 try {
                     const data = await getArtworkDetail(id);
+                    console.log("DEBUG DETAIL:", data.object);
                     setDetail(data.object);
                 } catch (error) {
                     console.error("Error fetching detail:", error);
