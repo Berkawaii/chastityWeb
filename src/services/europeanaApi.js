@@ -9,11 +9,6 @@ const europeanaApi = axios.create({
 
 // Middleware to inject API key to every request
 europeanaApi.interceptors.request.use((config) => {
-  // Ensure we don't end up with // in the URL which axios/browser might misinterpret
-  if (config.url && config.url.startsWith('//')) {
-    config.url = config.url.substring(1);
-  }
-
   config.params = {
     ...config.params,
     wskey: API_KEY,
@@ -56,9 +51,11 @@ export const searchArtworks = async ({
 
 export const getArtworkDetail = async (id) => {
   try {
-    // some IDs start with /, remove it to avoid // in axios request
-    const cleanId = id.startsWith('/') ? id.substring(1) : id;
-    const response = await europeanaApi.get(`/${cleanId}.json`);
+    // Ensure id starts with / for joining
+    const cleanId = id.startsWith('/') ? id : `/${id}`;
+    // Using absolute URL to avoid baseURL joining issues
+    const url = `${BASE_URL}${cleanId}.json`;
+    const response = await europeanaApi.get(url);
     return response.data;
   } catch (error) {
     console.error('Error fetching artwork detail:', error);
