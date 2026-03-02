@@ -14,7 +14,6 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
                 setLoading(true);
                 try {
                     const data = await getArtworkDetail(id);
-                    console.log("DEBUG DETAIL:", data.object);
                     setDetail(data.object);
                 } catch (error) {
                     console.error("Error fetching detail:", error);
@@ -27,6 +26,53 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
     }, [id, isOpen]);
 
     if (!isOpen) return null;
+
+    // Helper to extract value from language-keyed objects or arrays
+    const getLangValue = (obj) => {
+        if (!obj) return null;
+        if (Array.isArray(obj)) return obj[0];
+        if (typeof obj === 'string') return obj;
+
+        // Priority: en -> def -> sv -> any first key
+        return obj.en?.[0] || obj.def?.[0] || obj.sv?.[0] || Object.values(obj)[0]?.[0] || null;
+    };
+
+    // Helper to find field across all proxies (checking both camelCase and colon-based keys)
+    const getField = (camelKey, colonKey) => {
+        if (!detail?.proxies) return null;
+        for (const proxy of detail.proxies) {
+            const val = proxy[camelKey] || proxy[colonKey];
+            if (val) {
+                const result = getLangValue(val);
+                if (result) return result;
+            }
+        }
+        return null;
+    };
+
+    const title = getField('dcTitle', 'dc:title') || 'Untitled';
+    const creator = getField('dcCreator', 'dc:creator') || 'Unknown Artist';
+    const year = getField('dcDate', 'dc:date');
+    const description = getField('dcDescription', 'dc:description');
+    const type = getField('dcType', 'dc:type');
+    const country = getField('edmCountry', 'edm:country');
+
+    // Image resolution priority (Record API specific paths)
+    const imageUrl =
+        detail?.aggregations?.[0]?.edmIsShownBy ||
+        detail?.aggregations?.[0]?.edmObject ||
+        detail?.aggregations?.[0]?.['edm:isShownBy']?.[0] ||
+        detail?.aggregations?.[0]?.['edm:hasView']?.[0] ||
+        getField('edmPreview', 'edm:preview');
+
+    const provider = detail?.aggregations?.[0]?.edmDataProvider?.[0] ||
+        detail?.aggregations?.[0]?.['edm:dataProvider']?.[0] ||
+        detail?.aggregations?.[0]?.edmInstitutionName?.[0] ||
+        getLangValue(detail?.aggregations?.[0]?.edmDataProvider);
+
+    const sourceUrl = detail?.aggregations?.[0]?.edmIsShownAt?.[0] ||
+        detail?.aggregations?.[0]?.['edm:isShownAt']?.[0] ||
+        (detail?.aggregations?.[0]?.edmIsShownAt && detail.aggregations[0].edmIsShownAt[0]);
 
     return (
         <AnimatePresence>
@@ -87,33 +133,28 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
                                     boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
                                     borderRadius: '2px',
                                     background: 'white',
-                                    padding: '2rem'
+                                    padding: '2rem',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    minHeight: '400px'
                                 }}
                             >
                                 <img
-                                    src={
-                                        detail.aggregations?.[0]?.['edm:isShownBy']?.[0] ||
-                                        detail.aggregations?.[0]?.['edm:hasView']?.[0] ||
-                                        detail.proxies?.find(p => p['edm:preview'])?.['edm:preview']?.[0] ||
-                                        detail.proxies?.[0]?.['edm:preview']?.[0]
-                                    }
-                                    alt="Artwork"
-                                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                                    src={imageUrl}
+                                    alt={title}
+                                    style={{ maxWidth: '100%', maxHeight: '70vh', display: 'block' }}
                                 />
                             </motion.div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                 <div>
                                     <h2 style={{ fontSize: '3rem', lineHeight: 1.2, marginBottom: '1rem' }}>
-                                        {detail.proxies?.find(p => p['dc:title'])?.['dc:title']?.[0] ||
-                                            detail.proxies?.[0]?.['dc:title']?.[0] || 'Untitled'}
+                                        {title}
                                     </h2>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--color-accent)', fontWeight: '500' }}>
                                         <User size={18} />
-                                        <span>
-                                            {detail.proxies?.find(p => p['dc:creator'])?.['dc:creator']?.[0] ||
-                                                detail.proxies?.[0]?.['dc:creator']?.[0] || 'Unknown Artist'}
-                                        </span>
+                                        <span>{creator}</span>
                                     </div>
                                 </div>
 
@@ -125,39 +166,23 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
                                     borderTop: '1px solid var(--color-border)',
                                     borderBottom: '1px solid var(--color-border)'
                                 }}>
-                                    <DetailItem
-                                        icon={<Calendar size={18} />}
-                                        label="Year"
-                                        value={detail.proxies?.find(p => p['dc:date'])?.['dc:date']?.[0] || detail.proxies?.[0]?.['dc:date']?.[0]}
-                                    />
-                                    <DetailItem
-                                        icon={<Landmark size={18} />}
-                                        label="Museum"
-                                        value={detail.aggregations?.[0]?.['edm:dataProvider']?.[0] || detail.aggregations?.[0]?.['edm:institutionName']?.[0]}
-                                    />
-                                    <DetailItem
-                                        icon={<MapPin size={18} />}
-                                        label="Country"
-                                        value={detail.proxies?.find(p => p['edm:country'])?.['edm:country']?.[0] || detail.proxies?.[0]?.['edm:country']?.[0]}
-                                    />
-                                    <DetailItem
-                                        icon={<Info size={18} />}
-                                        label="Type"
-                                        value={detail.proxies?.find(p => p['dc:type'])?.['dc:type']?.[0] || detail.proxies?.[0]?.['dc:type']?.[0]}
-                                    />
+                                    <DetailItem icon={<Calendar size={18} />} label="Year" value={year} />
+                                    <DetailItem icon={<Landmark size={18} />} label="Museum" value={provider} />
+                                    <DetailItem icon={<MapPin size={18} />} label="Country" value={country} />
+                                    <DetailItem icon={<Info size={18} />} label="Type" value={type} />
                                 </div>
 
-                                {detail.proxies?.some(p => p['dc:description']) && (
+                                {description && (
                                     <div>
                                         <h4 style={{ marginBottom: '1rem', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', color: 'var(--color-text-muted)' }}>Description</h4>
                                         <p style={{ color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
-                                            {detail.proxies?.find(p => p['dc:description'])?.['dc:description']?.[0]}
+                                            {description}
                                         </p>
                                     </div>
                                 )}
 
                                 <a
-                                    href={detail.aggregations?.[0]?.['edm:isShownAt']?.[0]}
+                                    href={sourceUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{
