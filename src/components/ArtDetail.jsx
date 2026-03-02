@@ -50,6 +50,19 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
         return null;
     };
 
+    // Helper to find field across all aggregations
+    const getAggregationField = (field) => {
+        if (!detail?.aggregations) return null;
+        for (const agg of detail.aggregations) {
+            const val = agg[field] || agg[`edm:${field}`] || agg[`edm${field.charAt(0).toUpperCase() + field.slice(1)}`];
+            if (val) {
+                const result = getLangValue(val);
+                if (result) return result;
+            }
+        }
+        return null;
+    };
+
     const title = getField('dcTitle', 'dc:title') || 'Untitled';
     const creator = getField('dcCreator', 'dc:creator') || 'Unknown Artist';
     const year = getField('dcDate', 'dc:date');
@@ -57,22 +70,21 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
     const type = getField('dcType', 'dc:type');
     const country = getField('edmCountry', 'edm:country');
 
-    // Image resolution priority (Record API specific paths)
+    // Image resolution priority
     const imageUrl =
-        detail?.aggregations?.[0]?.edmIsShownBy ||
-        detail?.aggregations?.[0]?.edmObject ||
-        detail?.aggregations?.[0]?.['edm:isShownBy']?.[0] ||
-        detail?.aggregations?.[0]?.['edm:hasView']?.[0] ||
+        getAggregationField('edmIsShownBy') ||
+        getAggregationField('isShownBy') ||
+        getAggregationField('edmObject') ||
+        getAggregationField('object') ||
+        getAggregationField('edmHasView') ||
         getField('edmPreview', 'edm:preview');
 
-    const provider = detail?.aggregations?.[0]?.edmDataProvider?.[0] ||
-        detail?.aggregations?.[0]?.['edm:dataProvider']?.[0] ||
-        detail?.aggregations?.[0]?.edmInstitutionName?.[0] ||
-        getLangValue(detail?.aggregations?.[0]?.edmDataProvider);
+    const provider = getAggregationField('edmDataProvider') ||
+        getAggregationField('dataProvider') ||
+        getAggregationField('edmInstitutionName');
 
-    const sourceUrl = getLangValue(detail?.aggregations?.[0]?.edmIsShownAt) ||
-        getLangValue(detail?.aggregations?.[0]?.['edm:isShownAt']) ||
-        detail?.aggregations?.[0]?.edmIsShownAt?.[0];
+    const sourceUrl = getAggregationField('edmIsShownAt') ||
+        getAggregationField('isShownAt');
 
     return (
         <AnimatePresence>

@@ -18,6 +18,7 @@ function App() {
   const [totalResults, setTotalResults] = useState(0);
 
   const fetchData = async (query, start = 1, append = false) => {
+    console.log(`FETCHING: query=${query}, start=${start}, append=${append}`);
     if (start === 1) setLoading(true);
     else setLoadingMore(true);
 
@@ -27,6 +28,8 @@ function App() {
         start: start,
         rows: 24
       });
+
+      console.log(`FETCHED: items=${data.items.length}, total=${data.totalResults}`);
 
       if (append) {
         setResults(prev => [...prev, ...data.items]);
