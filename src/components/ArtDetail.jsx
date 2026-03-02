@@ -179,7 +179,11 @@ const ArtDetail = ({ id, isOpen, onClose }) => {
                                     borderBottom: '1px solid var(--color-border)'
                                 }}>
                                     <DetailItem icon={<Calendar size={18} />} label="Year" value={year} />
-                                    <DetailItem icon={<Landmark size={18} />} label="Museum" value={provider} />
+                                    <DetailItem
+                                        icon={<img src={`${import.meta.env.BASE_URL}chastity.svg`} alt="" style={{ height: '18px', width: 'auto', opacity: 0.8 }} />}
+                                        label="Museum"
+                                        value={provider}
+                                    />
                                     <DetailItem icon={<MapPin size={18} />} label="Country" value={country} />
                                     <DetailItem icon={<Info size={18} />} label="Type" value={type} />
                                 </div>

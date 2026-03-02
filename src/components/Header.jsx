@@ -25,7 +25,11 @@ const Header = ({ onSearch }) => {
             borderBottom: '1px solid var(--color-border)'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <Landmark size={28} color="var(--color-accent)" />
+                <img
+                    src={`${import.meta.env.BASE_URL}chastity.svg`}
+                    alt="Chastity Logo"
+                    style={{ height: '32px', width: 'auto', filter: 'brightness(0) saturate(100%) invert(60%) sepia(19%) hue-rotate(5deg) brightness(91%) contrast(83%)' }}
+                />
                 <h1 style={{ fontSize: '1.5rem', letterSpacing: '-0.5px' }}>CHASTITY</h1>
             </div>
 
