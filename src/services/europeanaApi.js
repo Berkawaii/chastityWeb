@@ -51,11 +51,17 @@ export const searchArtworks = async ({
 
 export const getArtworkDetail = async (id) => {
   try {
-    // Ensure id starts with / for joining
+    // some IDs already start with /, some don't.
     const cleanId = id.startsWith('/') ? id : `/${id}`;
-    // Using absolute URL to avoid baseURL joining issues
-    const url = `${BASE_URL}${cleanId}.json`;
-    const response = await europeanaApi.get(url);
+    // Construct the absolute URL manually
+    const absoluteUrl = `https://api.europeana.eu/record/v2${cleanId}.json`;
+
+    // Use the plain axios instance to avoid any baseURL or interceptor interference
+    const response = await axios.get(absoluteUrl, {
+      params: {
+        wskey: API_KEY,
+      }
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching artwork detail:', error);
