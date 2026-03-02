@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_KEY = import.meta.env.VITE_EUROPEANA_API_KEY || 'strefledince';
+const API_KEY = import.meta.env.VITE_EUROPEANA_API_KEY;
 const BASE_URL = 'https://api.europeana.eu/record/v2';
 
 const europeanaApi = axios.create({
