@@ -1,16 +1,83 @@
-# React + Vite
+# Chastity Virtual Museum
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A chic, simple, and beautiful online virtual museum application powered by the [Europeana API](https://pro.europeana.eu/page/apis). This project allows users to browse through high-quality masterpieces, view detailed artwork metadata, and explore various art eras and artists in an elegant, responsive interface.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Chic & Minimalist UI:** Modern aesthetics using glassmorphism effects, soft shadows, and clean typography.
+- **Europeana API Integration:** Search and discover thousands of artworks, filtering by specific categories.
+- **Infinite Scroll:** Seamless browsing experience with automatic fetching of next artwork batches.
+- **Artwork Detail View:** Detailed modal presenting high-resolution images, creator, year, museum provider, and more.
+- **"View on Source" Integration:** Direct links to the original museum or data provider's website.
+- **Responsive Design:** Optimized for both desktop and mobile viewing.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend:** React, HTML, Vanilla CSS (Design Tokens & Glassmorphism)
+- **Libraries:**
+  - `axios` for API requests
+  - `framer-motion` for smooth UI animations
+  - `lucide-react` for beautiful, modern icons
+- **Build Tool:** Vite
+- **Deployment:** GitHub Pages (via GitHub Actions)
 
-## Expanding the ESLint configuration
+## 🚀 Live Demo
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Experience the virtual museum here: [Chastity Virtual Museum](https://berkawaii.github.io/chastityWeb/)
+
+## 💻 Getting Started
+
+### Prerequisites
+
+- Node.js (v18.0.0 or higher recommended)
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Berkawaii/chastityWeb.git
+   cd chastityWeb
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Environment Variables:**
+   - Create a `.env` file in the root of the project.
+   - Obtain an API key from [Europeana](https://pro.europeana.eu/page/get-api).
+   - Add your key to the `.env` file:
+     ```env
+     VITE_EUROPEANA_API_KEY=your_api_key_here
+     ```
+
+4. **Run the Development Server:**
+   ```bash
+   npm run dev
+   ```
+   The app will be available at `http://localhost:5173`.
+
+## 📦 Deployment
+
+This project is configured to automatically build and deploy to GitHub Pages using GitHub Actions whenever a push is made to the `main` branch.
+
+To manually deploy from your local machine:
+```bash
+npm run deploy
+```
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).
