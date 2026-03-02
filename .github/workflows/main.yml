@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_EUROPEANA_API_KEY: ${{ secrets.VITE_EUROPEANA_API_KEY || 'strefledince' }}
+          VITE_EUROPEANA_API_KEY: ${{ secrets.VITE_EUROPEANA_API_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
